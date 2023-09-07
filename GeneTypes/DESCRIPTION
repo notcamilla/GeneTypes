@@ -1,0 +1,28 @@
+Package: GeneTypes
+Type: Package
+Title: R package for gene objects which represent different gene types
+Description: Provides a set of S4 classes for different gene types (coding gene, 
+    long non coding gene, micro RNA gene, tRNA gene, rRNA gene and small nuclear 
+    gene). Each gene class contains informations about ID, symbol, name, 
+    structure and possible products. Constructor functions and accessor 
+    functions are provided for getting and setting the information of a gene.
+    This package provides also a class specific function 
+    to compute the length of the product of a specific gene object.
+Version: 0.99.0
+Date: 2023-05-28
+Authors@R: person("Camilla", "Pozzi", email = "camilla.pozzi@mail.polimi.it", 
+    role = c("aut", "cre"))
+License: GPL-3
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Depends: R(>= 4.1.0), GenomicRanges, TxDb.Hsapiens.UCSC.hg38.knownGene,
+        BSgenome.Hsapiens.UCSC.hg38
+Imports: GenomicFeatures, microRNA, Biostrings, methods, utils
+Suggests: rmarkdown, testthat, BiocStyle, knitr
+VignetteBuilder: knitr
+biocViews: AnnotationData, SequenceAnnotation, GenomicSequence
+NeedsCompilation: no
+Packaged: 2023-06-08 15:57:45 UTC; camilla
+Author: Camilla Pozzi [aut, cre]
+Maintainer: Camilla Pozzi <camilla.pozzi@mail.polimi.it>

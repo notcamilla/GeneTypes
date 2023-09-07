@@ -1,0 +1,144 @@
+---
+title: "GeneTypes R package"
+author:
+  name: Camilla Pozzi
+  email: camilla.pozzi@mail.polimi.it
+package: GeneTypes
+output: 
+  BiocStyle::html_document
+abstract: |
+  This package provides a set of S4 classes for different gene types (coding gene, long non coding gene, micro RNA gene, tRNA gene, rRNA gene and small nuclear gene). Each gene class contains informations about ID, symbol, name, structure and possible products. This package provides also a class specific function to compute the length of the product of a specific gene object.
+vignette: |
+  %\VignetteIndexEntry{GeneTypes R package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r style, echo=FALSE, message=FALSE}
+library(BiocStyle)
+library(knitr)
+library(GeneTypes)
+```
+
+# Introduction
+
+The aim of this project was to create different S4 classes for different gene types, which contains specific information about the gene, like the ID, HUGO symbol, gene name, description, structure, gene product.  
+A lengthproduct function was also created to find the length of the specific product for each gene type subclass. 
+
+This vignette demonstrates how to use the GeneTypes package in R. 
+
+## Gene types selected
+
+A selection of the most common and significant gene types was made, in order to include them in this package. They are:
+-Protein coding genes
+-Long non-coding genes
+-Micro-RNA genes
+-Ribosomal RNA genes
+-Transfer RNA genes
+-Small-nuclear RNA genes
+
+# Installation and dependencies
+
+This packages is dependent on 3 packages: GenomicRanges, TxDb.Hsapiens.UCSC.hg38.knownGene and BSgenome.Hsapiens.UCSC.hg38. 
+GenomicRanges is used to store and manipulate genomic intervals and variables identified along a genome. To install GenomicRanges:
+`BiocManager::install("GenomicRanges")`. 
+TxDb.Hsapiens.UCSC.hg38.knownGene exposes an annotation database made from UCSC by exposing them as txdb objects. To install TxDb.Hsapiens.UCSC.hg38.knownGene: `BiocManager::install("TxDb.Hsapiens.UCSC.hg38.knownGene")`.
+BSgenome.Hsapiens.UCSC.hg38 is the full genomic sequence for human provided by UCSC. To install BSgenome.Hsapiens.UCSC.hg38:  `BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")`. 
+
+```{r loading packages, message=FALSE, warning=FALSE}
+library(GenomicRanges)
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+library(BSgenome.Hsapiens.UCSC.hg38)
+```
+
+# Functions
+
+The **mRNAseq** function retrieves the mature mRNA sequence for a Protein Coding Gene object. The **proteinseq** function retrieves the protein sequence for a Protein Coding Gene object.
+Beware that when you run both the functions you will get the same warning:
+"Warning message:
+In .set_group_names(grl, use.names, txdb, by) :
+  some group names are NAs or duplicated"
+To deal with this I checked for NAs and duplicates, so I added some code to take care of them. 
+ 
+```{r warning message}
+# duplicated_tx_names <- duplicated(names(cds_bytx))
+```
+
+The **lengthProduct** function calculates the length of the product of the specific subclass. 
+Beware that when you run both this and the **proteinseq** function you will encounter the same warning message:
+"In .Call2("DNAStringSet_translate", x, skip_code, dna_codes[codon_alphabet],  ... :
+  in 'x[[1]]': last base was ignored"
+
+This means that the DNAStringSet obtained is not divisible by 3. For this warning message there is nothing we can do. When considering the results for the Protein Coding Gene class, you need to take into account the fact that 1/2 bases are ignored in every DNAStringSet analyzed. 
+
+Due the warnings in my code, I won't be able to perform the test_that for the 3 functions mentioned before. I decide to use *suppresWarnings* because I still need to be able to use the functions and perform the necessary testing, but I take them into consideration when evaluating my results. 
+The suppressWarnings was implemented like this:
+
+```{r suppressWarnings usage}
+# cds_bytx <- suppressWarnings(cdsBy(txdb, "tx", use.names=TRUE))
+# protein_seqs <- sapply(exons_seqs_bytx, function(seq) suppressWarnings(translate(seq)))
+```
+
+Now I don't have the warnings anymore and I can perform the test_that for all my functions without issues. 
+
+# @examples
+
+To be able to run the examples for the functions **getseed**, **matureMiRNAseq** and **lengthproduct** for the Micro-RNA Gene subclass, we need the hsSeqs database, which comes from the microRNA package. 
+To install microRNA: `BiocManager::install("microRNA")`
+Because in the @examples the data can't be load, the function can't run. I still included a complete example prefaced by **dontrun**, to prevent any error in the code. 
+
+
+# Examples
+
+## Protein Coding Gene
+This is an example on how you can use the different S4 classes provided to load different gene types. 
+The first example is a Protein Coding Gene. 
+
+```{r protein coding gene example}
+FAM3C <- ProteinCodingGene(id=10447, symbol= 'FAM3C', name='FAM3 metabolism regulating signaling molecule C',
+                    description = 'encodes a secreted protein with a GG domain', 
+                    structure = GRanges("chr7", IRanges(121348878, 121396364), 
+                    strand = '-'), proteinID = 'Q92520')
+```
+
+Get a value for a slot in the class. This can be done also for: id, symbol, name, description, structure and the specific product for the gene type. 
+
+```{r get structure example}
+structure(FAM3C)
+```
+
+Find the value of the length of the specific gene product. 
+
+```{r length product example }
+lengthProduct(FAM3C)
+```
+
+## tRNA Gene
+The second example is a t-RNA Gene.
+
+```{r trna gene example}
+TRAAGC11 <- tRNAGene(id=100189346, symbol= 'TRA-AGC1-1', name='tRNA-Ala (anticodon AGC) 1-1',
+                    description = 'tRNA-Ala (anticodon AGC) 1-1', 
+                    structure = GRanges("chr6", IRanges(28795964, 28796035), strand = "-"),
+                    tRNAID='URS000063E4FD_9606', anticodon='AGC')
+```
+
+Get a value for a slot in the class. Get a value for a slot in the class. This can be done also for: id, symbol, name, description, structure and the specific product for the gene type. 
+
+```{r get name example}
+name(TRAAGC11)
+```
+
+Find the value of the length of the specific gene product. 
+
+```{r length product example two}
+lengthProduct(TRAAGC11)
+```
+
+
+# Session info {.unnumbered}
+
+```{r sessionInfo, echo=FALSE}
+sessionInfo()
+```
+
